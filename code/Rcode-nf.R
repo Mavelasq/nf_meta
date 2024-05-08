@@ -2,7 +2,7 @@ install.packages('meta')
 
 #Set working directory to relevant folder
 
-setwd('C:/Users/soconne1/OneDrive - Tulane University/Desktop/EM-J')
+setwd('D:/Documents/Projects/NF_Meta Analysis/analysis/nf_meta/data')
 #Use the meta package
 library(meta)
 
