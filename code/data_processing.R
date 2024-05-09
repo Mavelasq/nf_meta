@@ -14,17 +14,19 @@ nf_data_filtered <- nf_data %>%
   calc_sd()
 
 # Initialize output dataframes for various comparisons and metrics
-outputs <- list(
-  smd_nft_fromBase = initialize_dfOut(nf_data_filtered, "base", "nft", "SMD"),
-  smd_nft_fromFirst = initialize_dfOut(nf_data_filtered, "first", "nft", "SMD"),
-  smd_rest_fromBase = initialize_dfOut(nf_data_filtered, "base", "rest", "SMD"),
+  smd_nft_fromBase = initialize_dfOut(nf_data_filtered, "base", "nft", "SMD")
+  smd_nft_fromFirst = initialize_dfOut(nf_data_filtered, "first", "nft", "SMD")
+  smd_rest_fromBase = initialize_dfOut(nf_data_filtered, "base", "rest", "SMD")
   smd_rest_fromFirst = initialize_dfOut(nf_data_filtered, "first", "rest", "SMD")
-)
+
 
 # Calculate Standard Mean Differences (SMD) or Percent Signal Change (PSC)
-outcome_results <- lapply(outputs, function(out_data) {
-  outcomeCalc(nf_data_filtered, "smd", out_data, "base", "nft") # Customize parameters as needed
-})
+  smd_nft_fromBase  <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromBase, "base", "train") # Customize parameters as needed
+  smd_nft_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromFirst, "first", "train") # Customize parameters as needed
+  smd_rest_fromBase <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromBase, "base", "rest") # Customize parameters as needed
+  smd_rest_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromFirst, "first", "rest") # Customize parameters as needed
+  
+
 
 # Function to convert standard error to standard deviation
 calc_sd <- function(nf_data) {
@@ -65,47 +67,86 @@ initialize_dfOut <- function(nf_data, firstValue, nftOrBase, outcome) {
   return(out)
 }
 
-
-outcomeCalc <- function(nf_data, outputCalc, out_data, firstValue, nftOrBase){
+outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trainOrRest){
   # Determine indices for training or rest data
-  idx_start_tr <- which(colnames(nf_data) == "mean_pre")
-  idx_end_tr   <- which(colnames(nf_data) == "var_ses_15")
-  idx_start_bl <- which(colnames(nf_data) == "mean_ses_bl_2")
-  idx_end_bl   <- which(colnames(nf_data) == "var_ses_bl_10")
-  idx_end      <- ncol(nf_data)
+  idx_start_tr <- which(colnames(nf_data_filtered) == "mean_pre")
+  idx_end_tr   <- which(colnames(nf_data_filtered) == "var_ses_15")
+  idx_start_bl <- which(colnames(nf_data_filtered) == "mean_ses_bl_2")
+  idx_end_bl   <- which(colnames(nf_data_filtered) == "var_ses_bl_10")
+  idx_end      <- ncol(nf_data_filtered)
+  
+  #firstValue <- "base"
+  #trainOrRest <- "rest"
+  
   
   # Convert df columns to numeric
-  nf_data[, idx_start_tr:idx_end] <- as.data.frame(lapply(nf_data[, idx_start_tr:idx_end], as.numeric))
-  nf_data$n <- as.numeric(nf_data$n)
+  nf_data_filtered[, idx_start_tr:idx_end] <- as.data.frame(lapply(nf_data_filtered[, idx_start_tr:idx_end], as.numeric))
+  nf_data_filtered$n <- as.numeric(nf_data_filtered$n)
   
-  # Determine participant indices based on input
-  ids <- if (firstValue == "first") which(!is.na(nf_data$mean_first)) else which(!is.na(nf_data$mean_pre))
+  # Determine paper indices based on input
+  ids <- if (firstValue == "first") which(!is.na(nf_data_filtered$mean_first)) else which(!is.na(nf_data_filtered$mean_pre))
+  
+  firstCol_mean <- if (firstValue == "first") "mean_first" else "mean_pre"
+  firstCol_var  <- if (firstValue == "first") "var_first" else "var_pre"
+  
+  #offset <- ifelse(trainOrRest == "rest", which(colnames(nf_data_filtered) == "mean_ses_bl_2") - 1,
+  #                 which(colnames(nf_data_filtered) == "mean_first") - 1)
+  
+  offset <- if (firstValue == "first") {which(colnames(nf_data_filtered) == "mean_last")-1
+  } else if (trainOrRest == "rest" & firstValue == "base"){which(colnames(nf_data_filtered) == "mean_ses_bl_2")-1
+  } else if (firstValue == "base"){which(colnames(nf_data_filtered) == "mean_first")-1}
   
   # Determine column indices for means and variances
-  idx_mean <- if (nftOrBase == "nft") which(grepl("mean", colnames(nf_data)[idx_start_tr:idx_end_tr])) + (idx_start_tr - 1)
-  else which(grepl("mean", colnames(nf_data)[idx_start_bl:idx_end_bl])) + (idx_start_bl - 1)
+  idx_mean <- if (trainOrRest == "train") {
+    which(grepl("mean", colnames(nf_data_filtered)[(idx_start_tr+2):idx_end_tr])) + (idx_start_tr+1)
+  } else {
+    which(grepl("mean", colnames(nf_data_filtered)[idx_start_bl:idx_end_bl])) + (idx_start_bl-1)
+  }
   
-  idx_sd <- if (nftOrBase == "nft") which(grepl("var", colnames(nf_data)[idx_start_tr:idx_end_tr])) + (idx_start_tr - 1)
-  else which(grepl("var", colnames(nf_data)[idx_start_bl:idx_end_bl])) + (idx_start_bl - 1)
+  idx_sd <- if (trainOrRest == "train") {
+    which(grepl("var", colnames(nf_data_filtered)[(idx_start_tr+2):idx_end_tr])) + (idx_start_tr+1)
+  } else {
+    which(grepl("var", colnames(nf_data_filtered)[idx_start_bl:idx_end_bl])) + (idx_start_bl-1)
+  }
   
   # Calculate SMD or PSC
   for (p in ids) {
-    idxs_mean <- idx_mean[which(!is.na(nf_data[p, idx_mean]))]
-    idxs_sd   <- idx_sd[which(!is.na(nf_data[p, idx_sd]))]
+    idxs_mean <- idx_mean[which(!is.na(nf_data_filtered[p, idx_mean]))]
+    idxs_sd   <- idx_sd[which(!is.na(nf_data_filtered[p, idx_sd]))]
     
     if (outputCalc == "smd") {
       for (s in idxs_sd) {
-        sd_pooled <- sqrt((nf_data$var_pre[p]^2 + nf_data[p, s]^2) / 2)
+        sd_pooled <- sqrt((nf_data_filtered[p, firstCol_var]^2 + nf_data_filtered[p, s]^2) / 2)
         for (i in idxs_mean) {
-          out_data[p, (i + 1) - i] <- (nf_data[p, i] - nf_data$mean_pre[p]) / sd_pooled
+          col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
+          if (col_index <= ncol(out_data)) {
+            out_data[p, col_index] <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled
+          }
         }
       }
-    } else if (outputCalc == "psc") {
+    }
+    else if (outputCalc == "smd1") {
+      for (s in idxs_sd) {
+        for (i in idxs_mean) {
+          col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
+          if (col_index <= ncol(out_data)) {
+            out_data[p, col_index] <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / nf_data_filtered[p, firstCol_var]
+          }
+        }
+      }
+    }
+    else if (outputCalc == "psc") {
       for (i in idxs_mean) {
-        out_data[p, (i + 1) - i] <- (nf_data[p, i] - nf_data$mean_pre[p]) / nf_data$mean_pre[p]
+        col_index <- (i - offset)
+        if (col_index <= ncol(out_data)) {
+          out_data[p, col_index] <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / nf_data_filtered[p, firstCol_mean]
+        }
       }
       for (s in idxs_sd) {
-        nf_data[p, s + 66] <- sqrt((nf_data$var_pre[p]^2 + nf_data[p, s]^2 - 2 * 0.5 * nf_data$var_pre[p] * nf_data[p, s]))
+        col_index <- (s - offset - 1)
+        if (col_index <= ncol(out_data)) {
+          nf_data_filtered[p, col_index] <- sqrt((nf_data_filtered[p, firstCol_var]^2 + nf_data_filtered[p, s]^2 - 2 * 0.5 * nf_data_filtered[p, firstCol_var] * nf_data_filtered[p, s]))
+        }
       }
     }
   }
