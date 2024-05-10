@@ -17,17 +17,18 @@ nf_data_filtered <- nf_data %>%
   smd_nft_fromBase = initialize_dfOut(nf_data_filtered, "base", "nft", "SMD")
   smd_nft_fromFirst = initialize_dfOut(nf_data_filtered, "first", "nft", "SMD")
   smd_rest_fromBase = initialize_dfOut(nf_data_filtered, "base", "rest", "SMD")
-  smd_rest_fromFirst = initialize_dfOut(nf_data_filtered, "first", "rest", "SMD")
-
 
 # Calculate Standard Mean Differences (SMD) or Percent Signal Change (PSC)
+# Calculate standard error (impute r to .08 accroding to Gnambs, 2023)
+# Formula for SE SMD as in Borenstein, 2009 (Introduction to Meta Analysis)
+# Formula for SD pooled as in Harrer, 2021 (Doing Meta-Analysis with R: A Hands-On Guide)
+  
   smd_nft_fromBase  <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromBase, "base", "train") # Customize parameters as needed
   smd_nft_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromFirst, "first", "train") # Customize parameters as needed
   smd_rest_fromBase <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromBase, "base", "rest") # Customize parameters as needed
-  smd_rest_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromFirst, "first", "rest") # Customize parameters as needed
-  
 
 
+# Functions ####
 # Function to convert standard error to standard deviation
 calc_sd <- function(nf_data) {
   idx_start <- which(colnames(nf_data) == "mean_pre")
@@ -69,15 +70,13 @@ initialize_dfOut <- function(nf_data, firstValue, nftOrBase, outcome) {
 
 outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trainOrRest){
   # Determine indices for training or rest data
-  idx_start_tr <- which(colnames(nf_data_filtered) == "mean_pre")
+  idx_start_tr <- ifelse(firstValue == "first", which(colnames(nf_data_filtered) == "mean_first"), which(colnames(nf_data_filtered) == "mean_pre"))
   idx_end_tr   <- which(colnames(nf_data_filtered) == "var_ses_15")
   idx_start_bl <- which(colnames(nf_data_filtered) == "mean_ses_bl_2")
   idx_end_bl   <- which(colnames(nf_data_filtered) == "var_ses_bl_10")
   idx_end      <- ncol(nf_data_filtered)
   
-  #firstValue <- "base"
-  #trainOrRest <- "rest"
-  
+  impute_r     <- .8 #correlation coefficient to impute in SE SMD formula
   
   # Convert df columns to numeric
   nf_data_filtered[, idx_start_tr:idx_end] <- as.data.frame(lapply(nf_data_filtered[, idx_start_tr:idx_end], as.numeric))
@@ -120,7 +119,8 @@ outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trai
         for (i in idxs_mean) {
           col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
           if (col_index <= ncol(out_data)) {
-            out_data[p, col_index] <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled
+            out_data[p, col_index]   <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled
+            out_data[p, col_index+1] <- sqrt(((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])))
           }
         }
       }
@@ -131,6 +131,8 @@ outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trai
           col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
           if (col_index <= ncol(out_data)) {
             out_data[p, col_index] <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / nf_data_filtered[p, firstCol_var]
+            out_data[p, col_index+1] <- sqrt(((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])))
+            
           }
         }
       }
