@@ -1,17 +1,20 @@
 # Load necessary libraries
-library(tidyverse)
-library(readxl)
+  library(tidyverse)
+  library(readxl)
+  library(dmetar)
+  library(meta)
+  library(esc)
 
 # Set working directory
-setwd("D:/Documents/Projects/NF_Meta Analysis/analysis/nf_meta")
+  setwd("D:/Documents/Projects/NF_Meta Analysis/analysis/nf_meta")
 
 # Load data set
-nf_data <- read_excel("data/nf_data.xlsx", sheet = 1)
+  nf_data <- read_excel("data/nf_data.xlsx", sheet = 1)
 
 # Preprocess data: Filter out rejected papers and convert SE to SD
-nf_data_filtered <- nf_data %>%
-  filter(reject == 0) %>%
-  calc_sd()
+  nf_data_filtered <- nf_data %>%
+    filter(reject == 0) %>%
+    calc_sd()
 
 # Initialize output dataframes for various comparisons and metrics
   smd_nft_fromBase = initialize_dfOut(nf_data_filtered, "base", "nft", "SMD")
@@ -19,7 +22,7 @@ nf_data_filtered <- nf_data %>%
   smd_rest_fromBase = initialize_dfOut(nf_data_filtered, "base", "rest", "SMD")
 
 # Calculate Standard Mean Differences (SMD) or Percent Signal Change (PSC)
-# Calculate standard error (impute r to .08 accroding to Gnambs, 2023)
+# Calculate standard error (impute r to .08 according to Gnambs, 2023)
 # Formula for SE SMD as in Borenstein, 2009 (Introduction to Meta Analysis)
 # Formula for SD pooled as in Harrer, 2021 (Doing Meta-Analysis with R: A Hands-On Guide)
   
@@ -27,6 +30,22 @@ nf_data_filtered <- nf_data %>%
   smd_nft_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromFirst, "first", "train") # Customize parameters as needed
   smd_rest_fromBase <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromBase, "base", "rest") # Customize parameters as needed
 
+# get pooled avg
+  m.gen <- metagen(TE = SMD_first_mean_last,
+                   seTE = SMD_first_var_last,
+                   studlab = nf_data_filtered$author_n,
+                   data = smd_nft_fromFirst,
+                   sm = "g",
+                   fixed = FALSE,
+                   random = TRUE,
+                   method.tau = "REML",
+                   method.random.ci = "HK",
+                   title = "Neurofeedback")
+  
+# weights first?
+# Calculate overall weighted average
+  #get weights for each study and multiply times SMD
+  #then get average weighted smd (4.2 and 4.3)
 
 # Functions ####
 # Function to convert standard error to standard deviation
@@ -113,19 +132,22 @@ outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trai
     idxs_mean <- idx_mean[which(!is.na(nf_data_filtered[p, idx_mean]))]
     idxs_sd   <- idx_sd[which(!is.na(nf_data_filtered[p, idx_sd]))]
     
-    if (outputCalc == "smd") {
+    if (outputCalc == "smd") { #get hedge's g
       for (s in idxs_sd) {
         sd_pooled <- sqrt((nf_data_filtered[p, firstCol_var]^2 + nf_data_filtered[p, s]^2) / 2)
         for (i in idxs_mean) {
           col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
           if (col_index <= ncol(out_data)) {
-            out_data[p, col_index]   <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled
-            out_data[p, col_index+1] <- sqrt(((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])))
+            d   <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled #compute d
+            j   <- 1 - (3/(4 * (nf_data_filtered$n[p] - 1)-1)) #compute correction factor for Hedge's g
+            v <- ((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])) #compute variance. Weights will be computed later on
+            out_data[p, col_index]   <- d*j #hedge's g
+            out_data[p, col_index+1] <- (j^2)*sqrt(v) #hedge's g variance
           }
         }
       }
     }
-    else if (outputCalc == "smd1") {
+    else if (outputCalc == "smd1") { # get glass's delta
       for (s in idxs_sd) {
         for (i in idxs_mean) {
           col_index <- (i - offset)  # Ensure this does not exceed the number of columns in out_data
