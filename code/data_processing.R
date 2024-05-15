@@ -3,6 +3,7 @@
   library(readxl)
   library(dmetar)
   library(meta)
+  library(metafor)
   library(esc)
 
 # Set working directory
@@ -24,32 +25,94 @@
 # Calculate Standard Mean Differences (SMD) or Percent Signal Change (PSC)
 # Calculate standard error (impute r to .08 according to Gnambs, 2023)
 # Formula for SE SMD as in Borenstein, 2009 (Introduction to Meta Analysis)
-# Formula for SD pooled as in Harrer, 2021 (Doing Meta-Analysis with R: A Hands-On Guide)
+# Formula for SD pooled and Hedge's g as in Harrer, 2021 (Doing Meta-Analysis with R: A Hands-On Guide)
   
   smd_nft_fromBase  <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromBase, "base", "train") # Customize parameters as needed
   smd_nft_fromFirst <- outcomeCalc(nf_data_filtered, "smd", smd_nft_fromFirst, "first", "train") # Customize parameters as needed
   smd_rest_fromBase <- outcomeCalc(nf_data_filtered, "smd", smd_rest_fromBase, "base", "rest") # Customize parameters as needed
 
-# get pooled avg
+# multiply es of "decrease" studies by -1 so that they are pointing in the direction of the prediction
+  smd_nft_fromBase <- switch.direction(smd_nft_fromBase)
+  smd_nft_fromFirst <- switch.direction(smd_nft_fromFirst)
+  smd_rest_fromBase <- switch.direction(smd_rest_fromBase)
+  
+# filter out NAs (this is done for plotting)
+  smd_nft_fromFirst$author <- nf_data_filtered$author_n
+  smd_nft_fromFirst_f      <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
+  
+# get pooled effect
   m.gen <- metagen(TE = SMD_first_mean_last,
                    seTE = SMD_first_var_last,
-                   studlab = nf_data_filtered$author_n,
-                   data = smd_nft_fromFirst,
-                   sm = "g",
+                   studlab = author,
+                   data = smd_nft_fromFirst_f,
+                   sm = "Hedge's g",
                    fixed = FALSE,
                    random = TRUE,
                    method.tau = "REML",
                    method.random.ci = "HK",
+                   prediction = TRUE,
                    title = "Neurofeedback")
+  summary(m.gen)
+
+# Outlier rejection due to high heterogeneity (I^2 > 50%)
+  find.outliers(m.gen) 
+  m.gen.inf <- InfluenceAnalysis(m.gen, random = TRUE)
+  plot(m.gen.inf, "baujat")
+  plot(m.gen.inf, "influence")
+  plot(m.gen.inf, "es")
+  plot(m.gen.inf, "i2")
+  m.rma <- rma(yi = m.gen$TE,
+               sei = m.gen$seTE,
+               method = m.gen$method.tau,
+               test = "knha")
+  res.gosh <- gosh(m.rma)
+
+# Forrest plots
+  m.gen
+  forest(m.gen)
   
-# weights first?
-# Calculate overall weighted average
-  #get weights for each study and multiply times SMD
-  #then get average weighted smd (4.2 and 4.3)
+  pdf(file='results/nf_plot.pdf', width=10, height=12)
+  forest(m.gen, sortvar=author, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
+         rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
+         bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
+  dev.off()
+  
+# Subgroup analyses
+  
+  #do power analyses per subgroup analysis
+  #blinding
+  #device
+  #instruction
+  #motivation
+  #feedback - how?
+    #per study
+    #what are numbers
+  #direction (check studies with both up/down)
+  #cont vs interval?
+  #rehearsal
+  #functional localizer
+  #eeg freq
+  #study quality
+  #ratio
+  #roi (aggregate)
+  
+
+# to do
+  # report sensitivity analysis  
+  # check studies with no SE
+  # run gosh for outliers
+  # test sig difference between pre-post sd to see if Glass' delta is necessary
+  # Clean code for samantha
+  # Convert PSC-only studies to Z score?
+  # bias 
+  
+  
+
+
 
 # Functions ####
 # Function to convert standard error to standard deviation
-calc_sd <- function(nf_data) {
+  calc_sd <- function(nf_data) {
   idx_start <- which(colnames(nf_data) == "mean_pre")
   idx_end <- ncol(nf_data)
   
@@ -70,7 +133,7 @@ calc_sd <- function(nf_data) {
 }
 
 # Function to initialize output data frames for SMD or PSC
-initialize_dfOut <- function(nf_data, firstValue, nftOrBase, outcome) {
+  initialize_dfOut <- function(nf_data, firstValue, nftOrBase, outcome) {
   idx_start_tr <- ifelse(nftOrBase == "nft" && firstValue == "base", which(colnames(nf_data) == "mean_first"), which(colnames(nf_data) == "mean_last"))
   idx_end_tr <- which(colnames(nf_data) == "var_ses_15")
   idx_start_bl <- which(colnames(nf_data) == "mean_ses_bl_2")
@@ -87,7 +150,17 @@ initialize_dfOut <- function(nf_data, firstValue, nftOrBase, outcome) {
   return(out)
 }
 
-outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trainOrRest){
+# multiply es of "decrease" studies by -1 so that they are pointing in the direction of the prediction
+  switch.direction <- function(dat){
+    dat_neg      <- dat
+    down_studies <- which(nf_data_filtered$direction =="down") #indices of studies where the task was to decrease activity
+    mean_idx     <- grep("mean",colnames(dat))  #indices of "mean" columns
+    dat_neg[down_studies, mean_idx] <- dat[down_studies, mean_idx]*-1 #multiple "decrease" studies effect sizes by -1
+    return(dat_neg)
+  }
+  
+# Calculate Standard Mean Differences (SMD) or Percent Signal Change (PSC)
+  outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trainOrRest){
   # Determine indices for training or rest data
   idx_start_tr <- ifelse(firstValue == "first", which(colnames(nf_data_filtered) == "mean_first"), which(colnames(nf_data_filtered) == "mean_pre"))
   idx_end_tr   <- which(colnames(nf_data_filtered) == "var_ses_15")
@@ -176,3 +249,5 @@ outcomeCalc <- function(nf_data_filtered, outputCalc, out_data, firstValue, trai
   }
   return(out_data)
 }
+
+  
