@@ -38,6 +38,8 @@
   
 # filter out NAs (this is done for plotting)
   smd_nft_fromFirst$author <- nf_data_filtered$author_n
+  smd_nft_fromFirst$blinding <- nf_data_filtered$blinding
+  smd_nft_fromFirst$device <- nf_data_filtered$device
   smd_nft_fromFirst_f      <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
   
 # get pooled effect
@@ -80,10 +82,33 @@
   
 # Subgroup analyses
   
-  #check Van_son_2, Zich and Anil
-  #do power analyses per subgroup analysis
   #blinding
+    #aggregate all blinding? 
+    #do power analysis
+    #change name of variable
+  update(m.gen, 
+         subgroup = blinding, 
+         tau.common = FALSE)
+
+  m.gen
+  pdf(file='results/blind subgroup.pdf', width=10, height=15)
+  forest(m.gen, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+         test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+  dev.off()
+  
   #device
+  
+  update(m.gen, 
+         subgroup = device, 
+         tau.common = FALSE)
+  
+  m.gen
+  pdf(file='results/device subgroup.pdf', width=10, height=15)
+  forest(m.gen, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+         test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+  dev.off()
   #instruction
   #motivation
   #feedback - how?
@@ -97,6 +122,7 @@
   #study quality
   #ratio
   #roi (aggregate)
+  #do power analyses per subgroup analysis
   
 
 # to do
