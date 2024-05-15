@@ -77,8 +77,10 @@
          bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
   dev.off()
   
+  
 # Subgroup analyses
   
+  #check Van_son_2, Zich and Anil
   #do power analyses per subgroup analysis
   #blinding
   #device
@@ -117,7 +119,7 @@
   idx_end <- ncol(nf_data)
   
   # Convert columns to numeric
-  nf_data[, idx_start:idx_end] <- as.data.frame(lapply(nf_data[, idx_start:idx_end], as.numeric))
+  nf_data[idx_start:idx_end] <- as.data.frame(lapply(nf_data[, idx_start:idx_end], as.numeric))
   nf_data$n <- as.numeric(nf_data$n)
   
   se_idxs <- which(nf_data$var_measure == "SE")
@@ -213,8 +215,8 @@
           if (col_index <= ncol(out_data)) {
             d   <- (nf_data_filtered[p, i] - nf_data_filtered[p, firstCol_mean]) / sd_pooled #compute d
             j   <- 1 - (3/(4 * (nf_data_filtered$n[p] - 1)-1)) #compute correction factor for Hedge's g
-            v <- ((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])) #compute variance. Weights will be computed later on
             out_data[p, col_index]   <- d*j #hedge's g
+            v <- ((2*(1-impute_r))/nf_data_filtered$n[p])+(out_data[p, col_index]^2/(2*nf_data_filtered$n[p])) #compute variance. Weights will be computed later on
             out_data[p, col_index+1] <- (j^2)*sqrt(v) #hedge's g variance
           }
         }
