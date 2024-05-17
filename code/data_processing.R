@@ -10,7 +10,8 @@
   setwd("D:/Documents/Projects/NF_Meta Analysis/analysis/nf_meta")
 
 # Load data set
-  nf_data <- read_excel("data/nf_data.xlsx", sheet = 1)
+  #nf_data <- read_excel("data/nf_data.xlsx", sheet = 1)
+  nf_data <- read.csv("data/nf_data.csv")
 
 # Preprocess data: Filter out rejected papers and convert SE to SD
   nf_data_filtered <- nf_data %>%
@@ -36,16 +37,19 @@
   smd_nft_fromFirst <- switch.direction(smd_nft_fromFirst)
   smd_rest_fromBase <- switch.direction(smd_rest_fromBase)
   
-# filter out NAs (this is done for plotting)
-  smd_nft_fromFirst$author <- nf_data_filtered$author_n
-  smd_nft_fromFirst$blinding <- nf_data_filtered$blinding
-  smd_nft_fromFirst$device <- nf_data_filtered$device
-  smd_nft_fromFirst_f      <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
+# add variables and filter out NAs 
+  smd_nft_fromFirst <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
+  smd_nft_fromBase <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
+  smd_rest_fromBase <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
+  
+  smd_nft_fromFirst_f        <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
+  smd_nft_fromBase_f         <- filter(smd_nft_fromBase, !is.na(SMD_base_mean_post))
+  
   
 # get pooled effect
   m.gen <- metagen(TE = SMD_first_mean_last,
                    seTE = SMD_first_var_last,
-                   studlab = author,
+                   studlab = author_n,
                    data = smd_nft_fromFirst_f,
                    sm = "Hedge's g",
                    fixed = FALSE,
@@ -63,6 +67,7 @@
   plot(m.gen.inf, "influence")
   plot(m.gen.inf, "es")
   plot(m.gen.inf, "i2")
+  
   m.rma <- rma(yi = m.gen$TE,
                sei = m.gen$seTE,
                method = m.gen$method.tau,
@@ -79,36 +84,6 @@
          bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
   dev.off()
   
-  
-# Subgroup analyses
-  
-  #blinding
-    #aggregate all blinding? 
-    #do power analysis
-    #change name of variable
-  update(m.gen, 
-         subgroup = blinding, 
-         tau.common = FALSE)
-
-  m.gen
-  pdf(file='results/blind subgroup.pdf', width=10, height=15)
-  forest(m.gen, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
-         test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
-  dev.off()
-  
-  #device
-  
-  update(m.gen, 
-         subgroup = device, 
-         tau.common = FALSE)
-  
-  m.gen
-  pdf(file='results/device subgroup.pdf', width=10, height=15)
-  forest(m.gen, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
-         test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
-  dev.off()
   #instruction
   #motivation
   #feedback - how?
@@ -181,7 +156,7 @@
 # multiply es of "decrease" studies by -1 so that they are pointing in the direction of the prediction
   switch.direction <- function(dat){
     dat_neg      <- dat
-    down_studies <- which(nf_data_filtered$direction =="down") #indices of studies where the task was to decrease activity
+    down_studies <- which(nf_data_filtered$direction ==0) #indices of studies where the task was to decrease activity
     mean_idx     <- grep("mean",colnames(dat))  #indices of "mean" columns
     dat_neg[down_studies, mean_idx] <- dat[down_studies, mean_idx]*-1 #multiple "decrease" studies effect sizes by -1
     return(dat_neg)
@@ -199,8 +174,8 @@
   impute_r     <- .8 #correlation coefficient to impute in SE SMD formula
   
   # Convert df columns to numeric
-  nf_data_filtered[, idx_start_tr:idx_end] <- as.data.frame(lapply(nf_data_filtered[, idx_start_tr:idx_end], as.numeric))
-  nf_data_filtered$n <- as.numeric(nf_data_filtered$n)
+  #nf_data_filtered[, idx_start_tr:idx_end] <- as.data.frame(lapply(nf_data_filtered[, idx_start_tr:idx_end], as.numeric))
+  #nf_data_filtered$n <- as.numeric(nf_data_filtered$n)
   
   # Determine paper indices based on input
   ids <- if (firstValue == "first") which(!is.na(nf_data_filtered$mean_first)) else which(!is.na(nf_data_filtered$mean_pre))
