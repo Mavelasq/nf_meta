@@ -73,6 +73,21 @@
                method = m.gen$method.tau,
                test = "knha")
   res.gosh <- gosh(m.rma)
+  plot(res.gosh, alpha = 0.01)
+  
+  res.gosh.diag <- gosh.diagnostics(res.gosh, 
+                                    km.params = list(centers = 2),
+                                    db.params = list(eps = 0.08, 
+                                                     MinPts = 50))
+  res.gosh.diag
+  
+  plot(res.gosh.diag)
+  
+  update(m.gen, exclude = c(33)) %>% 
+    summary()
+  
+  #study 33 (vanson_2) will be excluded as an outlier
+  #sensitivity analysis will be performed with and without 33
 
 # Forrest plots
   m.gen
