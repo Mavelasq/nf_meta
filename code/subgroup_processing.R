@@ -16,53 +16,53 @@
   dev.off()
 
 #device
- device <- update(m.gen_outX, 
+ sub.device <- update(m.gen_outX, 
                   subgroup = device, 
                   tau.common = FALSE)
-  summary(device)
+  summary(sub.device)
   
-  device
+  sub.device
   pdf(file='results/device subgroup.pdf', width=10, height=15)
-  forest(device, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  forest(sub.device, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
   dev.off()
 
 #instruction
-  instruction <- update(overall, 
-                        subgroup = instruction, 
+  sub.instruction <- update(m.gen_outX, 
+                        subgroup = instruction_yn, 
                         tau.common = FALSE)
-  instruction
+  sub.instruction
   pdf(file='results/instruction subgroup.pdf', width=10, height=15)
-  forest(instruction, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  forest(sub.instruction, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
   dev.off()
 
 #motivation
-  motivation <- update(overall, 
-                        subgroup = motivation, 
+  sub.motivation <- update(m.gen_outX, 
+                        subgroup = motivation_yn, 
                         tau.common = FALSE)
-  motivation
+  sub.motivation
   pdf(file='results/motivation subgroup.pdf', width=10, height=15)
-  forest(motivation, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  forest(sub.motivation, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
   dev.off()
   
 #rehearsal
-  rehearsal <- update(overall, 
+  sub.rehearsal <- update(m.gen_outX, 
                        subgroup = rehearsal, 
                        tau.common = FALSE)
-  rehearsal
+  sub.rehearsal
   pdf(file='results/rehearsal subgroup.pdf', width=10, height=15)
-  forest(rehearsal, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  forest(sub.rehearsal, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
   dev.off()
   
 #functional localizer
-  func.loc <- update(overall, 
+  func.loc <- update(m.gen_outX, 
                        subgroup = func.loc, 
                        tau.common = FALSE)
   func.loc
@@ -73,53 +73,32 @@
   dev.off()
   
   
-#functional localizer
-  update.timing <- update(m.gen_outX, 
+# update timing (continuous or intermittent)
+  sub.update.timing <- update(m.gen_outX, 
                      subgroup = update.timing, 
                      tau.common = FALSE)
   
   summary(m.gen_outX)
-  update.timing
+  sub.update.timing
   pdf(file='results/update.timing subgroup.pdf', width=10, height=15)
-  forest(update.timing, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  forest(sub.update.timing, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
   dev.off()
   
-#feedback - how?
-#per study
-#what are numbers
-#direction (check studies with both up/down)
-#cont vs interval?
-#eeg freq
-#study quality
-#ratio
-#roi (aggregate)
-
-  
-  #instruction
-  #motivation
-  #feedback - how?
-  #per study
-  #what are numbers
-  #direction (check studies with both up/down)
-  #cont vs interval?
-  #rehearsal
-  #functional localizer
+# additional analyses
+  #feedback - check per study
   #eeg freq
-  #study quality
-  #ratio
-  #roi (aggregate)
-  #do power analyses per subgroup analysis
+  #ratio (filter by EEG papers)
+  #roi (aggregate regions?)
+  #bias
+  #from baseline studies
+  #test sig difference between pre-post sd to see if Glass' delta is necessary
+  #convert PSC-only studies to Z score?
+
   # what are variables that have more than 10 cases?
+    #make count
+  #fillout empty cases with data from papers
+  #
   
-  
-  # to do
-  # report sensitivity analysis  
-  # check studies with no SE
-  # run gosh for outliers
-  # test sig difference between pre-post sd to see if Glass' delta is necessary
-  # Clean code for samantha
-  # Convert PSC-only studies to Z score?
-  # bias 
-  
+
