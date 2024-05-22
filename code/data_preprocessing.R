@@ -59,6 +59,7 @@
   smd_nft_fromBase_f  <- filter(smd_nft_fromBase, !is.na(SMD_base_mean_post))
   
 # get pooled effect
+  # from first training trial
   m.gen <- metagen(TE = SMD_first_mean_last,
                    seTE = SMD_first_var_last,
                    studlab = author_n,
@@ -71,13 +72,28 @@
                    prediction = TRUE,
                    title = "Neurofeedback")
   summary(m.gen)
+  
+  # from pre-training baseline
+  m.gen_base <- metagen(TE = SMD_base_mean_post,
+                   seTE = SMD_base_var_post,
+                   studlab = author_n,
+                   data = smd_nft_fromBase_f,
+                   sm = "Hedge's g",
+                   fixed = FALSE,
+                   random = TRUE,
+                   method.tau = "REML",
+                   method.random.ci = "HK",
+                   prediction = TRUE,
+                   title = "Neurofeedback")
+  summary(m.gen_base)
+  
 
 # Outlier rejection due to high heterogeneity (I^2 > 50%)
   #study 33 (vanson_2) will be excluded as an outlier
   #sensitivity analysis will be performed with and without 33
-  m.rma <- rma(yi = m.gen$TE,
-               sei = m.gen$seTE,
-               method = m.gen$method.tau,
+  m.rma <- rma(yi = m.gen_base$TE,
+               sei = m.gen_base$seTE,
+               method = m.gen_base$method.tau,
                test = "knha")
   res.gosh <- gosh(m.rma)
   
@@ -92,13 +108,28 @@
   plot(res.gosh.diag)
   
   m.gen_outX <- update(m.gen, exclude = c(33)) #update model without outlier
+  m.gen_base_outX <- update(m.gen_base, exclude = c(9)) #update model without outlier
+  
 
 # Forrest plot of pooled effect size post-outlier removal
-  m.gen_outX
-  forest(m.gen_outX)
+  #from first training trial
+  m.gen_base_outX
+  forest(m.gen_base_outX)
   
-  pdf(file='results/nf_plot_outX.pdf', width=10, height=12)
-  forest(m.gen_outX, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
+  pdf(file='results/nf_plot_base_overall.pdf', width=10, height=12)
+  png(filename='results/first_overall.png', width=1000, height=1400, res=150)
+  overall_first <- forest(m.gen_outX, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
+         rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
+         bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
+  dev.off()
+  
+  #from pre-training baseline
+  m.gen_base_outX
+  forest(m.gen_base_outX)
+  
+  pdf(file='results/nf_plot_overall_base.pdf', width=10, height=12)
+  png(filename='results/base_overall.png', width=1000, height=1400, res=150)
+  forest(m.gen_base_outX, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
          bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
   dev.off()
