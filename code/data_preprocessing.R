@@ -51,8 +51,8 @@
   #smd_rest_fromBase <- switch.direction(smd_rest_fromBase)
   
 # add variables and filter out NAs 
-  smd_nft_fromFirst  <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
-  smd_nft_fromBase   <- cbind(smd_nft_fromBase, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
+  smd_nft_fromFirst  <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,8,11,12,14:17,18,19,21:32,37:40,42:49)])
+  smd_nft_fromBase   <- cbind(smd_nft_fromBase, nf_data_filtered[,c(2,3,8,11,12,14:17,18,19,21:32,37:40,42:49)])
   #smd_rest_fromBase <- cbind(smd_nft_fromFirst, nf_data_filtered[,c(2,3,11,14:17,19,31,37:40,42,49)])
   
   smd_nft_fromFirst_f <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
@@ -113,10 +113,10 @@
 
 # Forrest plot of pooled effect size post-outlier removal
   #from first training trial
-  m.gen_base_outX
-  forest(m.gen_base_outX)
+  m.gen_outX
+  forest(m.gen)
   
-  pdf(file='results/nf_plot_base_overall.pdf', width=10, height=12)
+  pdf(file='results/nf_plot_first_overall.pdf', width=10, height=12)
   png(filename='results/first_overall.png', width=1000, height=1400, res=150)
   overall_first <- forest(m.gen_outX, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
@@ -124,8 +124,8 @@
   dev.off()
   
   #from pre-training baseline
-  m.gen_base_outX
-  forest(m.gen_base_outX)
+  m.gen_base
+  forest(m.gen_base)
   
   pdf(file='results/nf_plot_overall_base.pdf', width=10, height=12)
   png(filename='results/base_overall.png', width=1000, height=1400, res=150)
