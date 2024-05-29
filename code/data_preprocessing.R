@@ -129,7 +129,7 @@
   
   pdf(file='results/nf_plot_overall_base.pdf', width=10, height=12)
   png(filename='results/base_overall.png', width=1000, height=1400, res=150)
-  forest(m.gen_base_outX, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
+  forest(m.gen_base, sortvar=author_n, fixed=FALSE, random=TRUE, lty.random=2, layout="meta", leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
          bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
   dev.off()

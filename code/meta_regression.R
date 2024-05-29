@@ -9,6 +9,8 @@
   smd_nft_fromFirst_f_out <- filter(smd_nft_fromFirst_f, !author_n == "vanSon_2")
   smd_nft_fromBase_f_out  <- filter(smd_nft_fromBase_f, !author_n == "Maszczyk")
   
+  write.csv(smd_nft_fromFirst, file = "results/smd_fromFirst1.csv")
+  write.csv(smd_nft_fromBase,  file = "results/smd_fromBase1.csv")
   
   #convert to numeric
   smd_nft_fromFirst_f_out[,c("year", "blinding", "update.timing", "training.dur.min",
@@ -81,4 +83,24 @@
   
   m.gen.reg_age <- metareg(m.gen_outX_age_first, ~age.mean)
   bubble(m.gen.reg_qa, studlab = FALSE, xlab = "Quality Score", ylab = "Standardized Mean Difference (Hedge's g)")
+  
+  
+  # time since first and amount of training
+  nf_first_long <- read.csv("data/smd_long.csv")
+  
+  m.gen_first_long <- metagen(TE = SMD,
+                   seTE = SE,
+                   studlab = author_n,
+                   data = nf_first_long,
+                   sm = "Hedge's g",
+                   fixed = FALSE,
+                   random = TRUE,
+                   method.tau = "REML",
+                   method.random.ci = "HK",
+                   prediction = TRUE,
+                   title = "Neurofeedback")
+  summary(m.gen)
+  
+  reg.t_since_first <- metareg(m.gen_first_long, ~train_amount_since_first)
+  bubble(reg.t_since_first, studlab = FALSE, xlab = "Time Since First", ylab = "Standardized Mean Difference (Hedge's g)")
   
