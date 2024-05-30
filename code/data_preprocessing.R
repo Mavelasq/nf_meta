@@ -58,6 +58,9 @@
   smd_nft_fromFirst_f <- filter(smd_nft_fromFirst, !is.na(SMD_first_mean_last))
   smd_nft_fromBase_f  <- filter(smd_nft_fromBase, !is.na(SMD_base_mean_post))
   
+  # log transform training duration
+  smd_nft_fromFirst_f$training.dur.min.log <- log(smd_nft_fromFirst_f$training.dur.min)
+  
 # get pooled effect
   # from first training trial
   m.gen <- metagen(TE = SMD_first_mean_last,
@@ -87,6 +90,7 @@
                    title = "Neurofeedback")
   summary(m.gen_base)
   
+  data.frame(m.gen$studlab, m.gen$w.random)
 
 # Outlier rejection due to high heterogeneity (I^2 > 50%)
   #study 33 (vanson_2) will be excluded as an outlier
@@ -108,7 +112,7 @@
   plot(res.gosh.diag)
   
   m.gen_outX <- update(m.gen, exclude = c(33)) #update model without outlier
-  m.gen_base_outX <- update(m.gen_base, exclude = c(9)) #update model without outlier
+  #m.gen_base_outX <- update(m.gen_base, exclude = c(9)) #update model without outlier
   
 
 # Forrest plot of pooled effect size post-outlier removal
