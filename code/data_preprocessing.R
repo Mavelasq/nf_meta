@@ -60,6 +60,8 @@
   
   # log transform training duration
   smd_nft_fromFirst_f$training.dur.min.log <- log(smd_nft_fromFirst_f$training.dur.min)
+  smd_nft_fromBase_f$training.dur.min.log  <- log(smd_nft_fromBase_f$training.dur.min)
+  
   
 # get pooled effect
   # from first training trial
@@ -90,6 +92,8 @@
                    title = "Neurofeedback")
   summary(m.gen_base)
   
+  
+  #get weights
   data.frame(m.gen$studlab, m.gen$w.random)
 
 # Outlier rejection due to high heterogeneity (I^2 > 50%)
@@ -137,6 +141,60 @@
          rightcols=c("effect.ci"), rightlab=c("g [95% CI]"), print.tau2=FALSE, 
          bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue")
   dev.off()
+  
+# Egger's test for bias
+  
+  #pool data
+  pool_smd <-data.frame(
+  c(smd_nft_fromFirst_f$author_n, smd_nft_fromBase_f$author_n),
+  c(smd_nft_fromFirst_f$SMD_first_mean_last, smd_nft_fromBase_f$SMD_base_mean_post),
+  c(smd_nft_fromFirst_f$SMD_first_var_last, smd_nft_fromBase_f$SMD_base_var_post))
+  
+  colnames(pool_smd) <- c("author", "SMD", "SE")
+  
+  m.gen_pool <- metagen(TE = SMD,
+                   seTE = SE,
+                   studlab = author,
+                   data = pool_smd,
+                   sm = "Hedge's g",
+                   fixed = FALSE,
+                   random = TRUE,
+                   method.tau = "REML",
+                   method.random.ci = "HK",
+                   prediction = TRUE,
+                   title = "Neurofeedback")
+  summary(m.gen_pool)
+  
+  m.gen_pool <- update(m.gen_pool, exclude = c(33)) #update model without outlier
+  
+  
+  # Define fill colors for contour
+  col.contour = c("gray75", "gray85", "gray95")
+  
+  # Generate funnel plot (we do not include study labels here)
+  meta::funnel(m.gen_pool, xlim = c(-0.5, 2),
+               contour = c(0.9, 0.95, 0.99),
+               col.contour = col.contour)
+  
+  # Add a legend
+  legend(x = 1.6, y = 0.01, 
+         legend = c("p < 0.1", "p < 0.05", "p < 0.01"),
+         fill = col.contour)
+  
+
+  # Produce funnel plot
+  meta::funnel(m.gen_pool,
+               xlim = c(-0.5, 2),
+               studlab = FALSE)
+  
+  meta::funnel(m.gen_base,
+               xlim = c(-0.5, 2),
+               studlab = FALSE)
+  
+  metabias(m.gen_outX, method.bias = "linreg")
+  metabias(m.gen_base, method.bias = "linreg")
+  
+  eggers.test(m.gen_pool)
   
 # Functions ####
 # Function to convert standard error to standard deviation

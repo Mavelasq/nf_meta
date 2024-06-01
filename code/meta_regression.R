@@ -51,7 +51,7 @@
   bubble(m.gen.reg, studlab = FALSE, xlab = "Total Training Duration (min)", ylab = "Standardized Mean Difference (Hedge's g)")
   
   #from baseline
-  m.gen.reg_base <- metareg(m.gen_base_outX, ~training.dur.min)
+  m.gen.reg_base <- metareg(m.gen_base, ~training.dur.min.log)
   bubble(m.gen.reg_base, studlab = FALSE, xlab = "Total Training Duration (min)", ylab = "Standardized Mean Difference (Hedge's g)")
   
   #QA
@@ -136,6 +136,8 @@
   #as numeric
   nf_base_long_f$trial_num  <- as.numeric(nf_base_long_f$trial_num)
   nf_first_long_f$trial_num <- as.numeric(nf_first_long_f$trial_num)
+  nf_first_long_f$trial_num <- as.numeric(nf_first_long_f$trial_num)
+  
   
   #with meta####
   m.gen_first_long <- metagen(TE = SMD,
@@ -167,7 +169,7 @@
   
   # 3 level meta regression 
   ## since first training trial
-  reg.train_since_first     <- metareg(m.gen_first_long, ~log.train_amount_since_first * rehearsal)
+  reg.train_since_first_int     <- metareg(m.gen_first_long, ~log.train_amount_since_first * log.time_since_first)
   reg.train_since_first.log <- metareg(m.gen_first_long, ~log.train_amount_since_first)
   reg.t_since_first         <- metareg(m.gen_first_long, ~time_since_first)
   reg.t_since_first.log     <- metareg(m.gen_first_long, ~log.time_since_first)
@@ -179,6 +181,7 @@
   bubble(reg.t_since_first.log, studlab = FALSE, xlab    = "log (Time Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
   
   ## since baseline
+  reg.train_since_base_int     <- metareg(m.gen_base_long, ~log.train_amount_since_first * log.time_since_first)
   reg.train_since_base     <- metareg(m.gen_base_long, ~train_amount_since_first)
   reg.train_since_base.log <- metareg(m.gen_base_long, ~log.train_amount_since_first)
   reg.t_since_base         <- metareg(m.gen_base_long, ~time_since_first)
