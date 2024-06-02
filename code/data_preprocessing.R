@@ -167,6 +167,10 @@
   
   m.gen_pool <- update(m.gen_pool, exclude = c(33)) #update model without outlier
   
+  #get weights from pooled
+  pool_weights <- data.frame(m.gen_pool$studlab, m.gen_pool$w.fixed)
+  
+  write.csv(pool_weights, "results/pooled_weights.csv")
   
   # Define fill colors for contour
   col.contour = c("gray75", "gray85", "gray95")

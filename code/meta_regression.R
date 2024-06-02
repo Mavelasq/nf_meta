@@ -176,7 +176,7 @@
   
   ##plots
   bubble(reg.train_since_first, studlab = FALSE, xlab    = "Amount of Training Since First Training Trial (min)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.train_since_first.log, studlab = FALSE, xlab = "log (Amount of Training Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.train_since_first_int, studlab = FALSE, pch = 1, xlab = "log (Amount of Training Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
   bubble(reg.t_since_first, studlab = FALSE, xlab    = "Time Since First Training Trial (days)", ylab = "Standardized Mean Difference (Hedge's g)")
   bubble(reg.t_since_first.log, studlab = FALSE, xlab    = "log (Time Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
   
