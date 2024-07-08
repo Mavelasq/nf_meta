@@ -1,6 +1,8 @@
 #multiple meta regresssion 
   library(PerformanceAnalytics)
   library(metafor)
+  library(dosresmeta)
+  
 #check for correlation between variables to see check for multicollinearity
   #if correlation occurs (>=.08), you can remove redundant variables
   #none were found
@@ -43,16 +45,16 @@
                        predictors = c("year", "blinding", "training.dur.min","QA_Score"),
                        interaction = FALSE)
   
-  
+
 #run meta regression on training duration
   #duration
   #from first training
-  m.gen.reg <- metareg(m.gen_outX, ~training.dur.min.log)
-  bubble(m.gen.reg, studlab = FALSE, xlab = "Total Training Duration (min)", ylab = "Standardized Mean Difference (Hedge's g)")
+  m.gen.reg <- metareg(m.gen_outX, ~ session.n*training.dur.min.log)
+  bubble(m.gen.reg, studlab = FALSE,pch = 1, xlab = "log(Total Training Duration (min))", ylab = "Standardized Mean Difference (Hedge's g)")
   
   #from baseline
   m.gen.reg_base <- metareg(m.gen_base, ~training.dur.min.log)
-  bubble(m.gen.reg_base, studlab = FALSE, xlab = "Total Training Duration (min)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(m.gen.reg_base, studlab = FALSE, pch = 1, xlab = "log(Total Training Duration (min))", ylab = "Standardized Mean Difference (Hedge's g)")
   
   #QA
   #from first training
@@ -66,23 +68,23 @@
   #age
   #from base
   smd_nft_fromBase_f$age.mean <- as.numeric(smd_nft_fromBase_f$age.mean)
-  age.exclude_base <- c(which(is.na(smd_nft_fromBase_f$age.mean)), 9)
+  age.exclude_base <- c(which(is.na(smd_nft_fromBase_f$age.mean)))
   
   m.gen_outX_age_base <- update(m.gen_base, exclude = age.exclude_base) #update model without outlier
   summary(m.gen_outX_age)
   
   m.gen.reg_age_base <- metareg(m.gen_outX_age_base, ~age.mean)
-  bubble(m.gen.reg_qa, studlab = FALSE, xlab = "Quality Score", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(m.gen.reg_age_base, pch = 1,  studlab = FALSE, xlab = "Age", ylab = "Standardized Mean Difference (Hedge's g)")
   
   #from first training
   smd_nft_fromFirst_f$age.mean <- as.numeric(smd_nft_fromFirst_f$age.mean)
-  age.exclude_first <- c(which(is.na(smd_nft_fromFirst_f$age.mean)), 33)
+  age.exclude_first <- c(which(is.na(smd_nft_fromFirst_f$age.mean)))
   
   m.gen_outX_age_first <- update(m.gen, exclude = age.exclude_first) #update model without outlier
   summary(m.gen_outX_age_first)
   
   m.gen.reg_age <- metareg(m.gen_outX_age_first, ~age.mean)
-  bubble(m.gen.reg_qa, studlab = FALSE, xlab = "Quality Score", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(m.gen.reg_age, pch = 1, studlab = FALSE, xlab = "Age", ylab = "Standardized Mean Difference (Hedge's g)")
   
   
   # time since first and amount of training
@@ -163,22 +165,25 @@
                               random = TRUE,
                               method.tau = "REML",
                               method.random.ci = "HK",
+                              cluster = author_n,
                               prediction = TRUE,
                               title = "Neurofeedback")
   summary(m.gen_base_long)
   
   # 3 level meta regression 
   ## since first training trial
-  reg.train_since_first_int     <- metareg(m.gen_first_long, ~log.train_amount_since_first * log.time_since_first)
+  reg.train_since_first_int <- metareg(m.gen_first_long, ~log.train_amount_since_first * log.time_since_first)
+  reg.train_since_first     <- metareg(m.gen_first_long, ~train_amount_since_first)
   reg.train_since_first.log <- metareg(m.gen_first_long, ~log.train_amount_since_first)
   reg.t_since_first         <- metareg(m.gen_first_long, ~time_since_first)
   reg.t_since_first.log     <- metareg(m.gen_first_long, ~log.time_since_first)
   
+
   ##plots
-  bubble(reg.train_since_first, studlab = FALSE, xlab    = "Amount of Training Since First Training Trial (min)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.train_since_first_int, studlab = FALSE, pch = 1, xlab = "log (Amount of Training Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.t_since_first, studlab = FALSE, xlab    = "Time Since First Training Trial (days)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.t_since_first.log, studlab = FALSE, xlab    = "log (Time Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.train_since_first, studlab = FALSE, pch = 1, xlab    = "Amount of Training Since First Training Trial (min)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.train_since_first.log, studlab = FALSE, pch = 1, xlab = "log (Amount of Training Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.t_since_first, studlab = FALSE, pch = 1, xlab    = "Time Since First Training Trial (days)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.t_since_first.log, studlab = FALSE, pch = 1, xlab    = "log (Time Since First Training Trial)", ylab = "Standardized Mean Difference (Hedge's g)")
   
   ## since baseline
   reg.train_since_base_int     <- metareg(m.gen_base_long, ~log.train_amount_since_first * log.time_since_first)
@@ -187,10 +192,10 @@
   reg.t_since_base         <- metareg(m.gen_base_long, ~time_since_first)
   reg.t_since_base.log     <- metareg(m.gen_base_long, ~log.time_since_first)
   
-  bubble(reg.train_since_base, studlab = FALSE, xlab    = "Amount of Training Since Baseline (min)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.train_since_base.log, studlab = FALSE, xlab = "log (Amount of Training Since Baseline)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.t_since_base, studlab = FALSE, xlab    = "Time Since Baseline (days)", ylab = "Standardized Mean Difference (Hedge's g)")
-  bubble(reg.t_since_base.log, studlab = FALSE, xlab    = "log (Time Since Baseline)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.train_since_base, studlab = FALSE,pch = 1,  xlab    = "Amount of Training Since Baseline (min)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.train_since_base.log, studlab = FALSE,pch = 1,  xlab = "log (Amount of Training Since Baseline)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.t_since_base, studlab = FALSE,pch = 1,  xlab    = "Time Since Baseline (days)", ylab = "Standardized Mean Difference (Hedge's g)")
+  bubble(reg.t_since_base.log, studlab = FALSE,pch = 1, xlab    = "log (Time Since Baseline)", ylab = "Standardized Mean Difference (Hedge's g)")
   
   
   # with metafor
@@ -198,10 +203,10 @@
                        V = SE, 
                        slab = author_n,
                        data = nf_first_long_f,
-                       random = ~ 1 | author_n/es.id, 
+                       random = ~ 1 | author_n/SMD, 
                        test = "t", 
                        method = "REML",
-                       mods = ~ log.train_amount_since_first)
+                       mods = ~ log.train_amount_since_first*log.time_since_first)
   summary(full.model)
   
   i2 <- var.comp(full.model)
@@ -217,5 +222,6 @@
   hist(nf_base_long_f$time_since_first)
   hist(nf_base_long_f$train_amount_since_first)
   
-  
+  outsum <- summary(reg.train_since_first_int)
+  data.frame(outsum)
   

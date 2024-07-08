@@ -1,0 +1,98 @@
+---
+title: "nf_report_6/5/24"
+author: "Miguel Velasquez"
+date: "2024-05-30"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(OpenImageR)
+load(".RData")
+```
+
+# Pooled effect sizes
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE, fig.cap = "Last vs. First training session. Random effects model: Hedge's g = 0.3358, CI = [ 0.2269; 0.4447], t = 6.27, p < 0.0001"}
+library(OpenImageR)
+knitr::include_graphics('results/final/first_overall.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE, fig.cap = "Post-training vs. Pre-training Baseline. Random effects model: Hedge's g = 0.2624, CI = [0.028; 0.497], t = 2.34, p = 0.031"}
+library(OpenImageR)
+knitr::include_graphics('results/final/base_overall.png')
+```
+
+## Transfer Trial vs First Training
+```{r, message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/first_trans_overall.png')
+```
+
+## Transfer Trial vs Baseline
+```{r, message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/base_trans_overall.png')
+```
+# Meta Regression Total Training Duration 
+## Total Training since First Training Trial
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/reg.train_since_first_overall.png')
+```
+
+```{r train dur first}
+summary(m.gen.reg)
+```
+
+## Total Training since Baseline
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/reg.train_since_base_overall.png')
+```
+
+```{r train dur base}
+summary(m.gen.reg_base)
+```
+
+# Meta Regression For Multiple Trials
+## SMD since First training session 
+### Interaction Between Amount of time and training since the first training trial
+```{r Interaction first}
+summary(reg.train_since_first_int)
+```
+
+### Amount of Training since First Training Session 
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Three-level Mixed-Effects Model showing the relationship between Hedge's g and Time since firs training trial. (k = 131, $F_{(1, 129)}$ = 14.86, *p* = 0.0002)",fig.show='hold'}
+knitr::include_graphics(c("results/final/reg.train_since_first.png","results/final/reg.train_since_first_log.png"))
+``` 
+
+### Amount of Time since First Training Session 
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Three-level Mixed-Effects Model showing the relationship between Hedge's g and Time since firs training trial. (k = 131, $F_{(1, 129)}$ = 14.86, *p* = 0.0002)",fig.show='hold'}
+knitr::include_graphics(c("results/final/reg.t_since_first.png","results/final/reg.t_since_first_log.png"))
+``` 
+
+## SMD since Pre-training Baseline 
+### Interaction Between Amount of time and training since the first training trial
+```{r Interaction base}
+summary(reg.train_since_base_int)
+```
+
+### Amount of Training since Baseline 
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Three-level Mixed-Effects Model showing the relationship between Hedge's g and Time since firs training trial. (k = 131, $F_{(1, 129)}$ = 14.86, *p* = 0.0002)",fig.show='hold'}
+knitr::include_graphics(c("results/final/reg.train_since_base.png","results/final/reg.train_since_base_log.png"))
+``` 
+
+### Amount of Training since Baseline 
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Three-level Mixed-Effects Model showing the relationship between Hedge's g and Time since firs training trial. (k = 131, $F_{(1, 129)}$ = 14.86, *p* = 0.0002)",fig.show='hold'}
+knitr::include_graphics(c("results/final/reg.t_since_base.png","results/final/reg.t_since_base_log.png"))
+``` 
+
+# Egger's Test
+```{r Eggers}
+summary(eggers)
+```
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Three-level Mixed-Effects Model showing the relationship between Hedge's g and Time since firs training trial. (k = 131, $F_{(1, 129)}$ = 14.86, *p* = 0.0002)",fig.show='hold'}
+knitr::include_graphics(c("results/final/funnel_plot.png","results/final/reg.t_since_base_log.png"))
+``` 

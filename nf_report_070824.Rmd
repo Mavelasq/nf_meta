@@ -1,0 +1,196 @@
+---
+title: "nf_report_7/8/24"
+author: "Miguel Velasquez"
+date: "2024-05-30"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(OpenImageR)
+load(".RData")
+```
+
+# Pooled effect sizes
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE, fig.cap = "Last vs. First training session. Random effects model: Hedge's g = 0.3358, CI = [ 0.2269; 0.4447], t = 6.27, p < 0.0001"}
+library(OpenImageR)
+knitr::include_graphics('results/final/first_overall.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE, fig.cap = "Post-training vs. Pre-training Baseline. Random effects model: Hedge's g = 0.2624, CI = [0.028; 0.497], t = 2.34, p = 0.031"}
+library(OpenImageR)
+knitr::include_graphics('results/final/base_overall.png')
+```
+
+# Meta Regression Total Training Duration 
+## Total Training since First Training Trial
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/reg.dur.png')
+```
+
+```{r train dur first}
+summary(m.gen.reg)
+```
+
+## Total Training since Baseline
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/reg.train_since_base_overall.png')
+```
+
+```{r train dur base}
+summary(m.gen.reg_base)
+```
+
+# Meta Regression Age 
+## Total Training since First Training Trial
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/reg.age.png')
+```
+
+```{r train dur first}
+summary(m.gen.reg_age)
+```
+
+## Total Training since Baseline
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/reg.age_base.png')
+```
+
+```{r train dur base}
+summary(m.gen.reg_age_base)
+```
+
+# Subgroup Device
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/device subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+All studies used EEG
+
+# Subgroup: Was instruction provided
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_instruction subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/final/base_instruction subgroup.png')
+```
+
+# Subgroup: Was there a pre-training rehearsal trial
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/rehearsal.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+None of the studies used pre-training rehearsal
+
+
+# Subgroup: Was functinal localizer used
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_func.loc subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/base_func.loc subgroup.png')
+```
+
+# Subgroup: Direction of modulation
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_direction subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/base_direction subgroup.png')
+```
+
+# Subgroup: Targeted EEG signal/frequency bands
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_freq subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/base_freq subgroup.png')
+```
+
+
+# Subgroup: Feedback type
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_feed subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/base_feed subgroup.png')
+```
+
+# Subgroup: EEG ROIs
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/first_roi subgroup.png')
+```
+
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/base_roi subgroup.png')
+```
+
+# Egger's Test
+## Last vs. First training session 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/eggers_first.png')
+```
+```{r Eggers}
+summary(eggers)
+```
+## Post-training vs. Pre-training Baseline 
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/eggers_base.png')
+```
+```{r Eggers base}
+summary(eggers_base)
+```
+
+
+
+# Quality Assessment
+```{r, out.width='100%', message = FALSE, echo=FALSE}
+library(OpenImageR)
+knitr::include_graphics('results/qa_traffic.png')
+```
+```{r Eggers}
+summary(eggers)
+```

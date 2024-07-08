@@ -1,119 +1,164 @@
 ## SUBGROUP ANALYSIS ##
+library(meta)
 
 #blinding
   # double and triple blinding studies were aggregated since there were too few triple blinding studies
-  sub.blind <- update(m.gen_outX, 
+  sub.blind <- update(m.gen, 
                    subgroup = blinding, 
                    tau.common = FALSE)
   summary(sub.blind)
   
-  sub.blind_base <- update(m.gen_base_outX, 
+  
+  sub.blind_base <- update(m.gen_base, 
                       subgroup = blinding, 
                       tau.common = FALSE)
   summary(sub.blind_base)
   
   sub.blind
-  pdf(file='results/blind subgroup.pdf', width=10, height=15)
-  forest(sub.blind, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  svg(file='results/base_blind subgroup.svg', width=10, height=16)
+  forest(sub.blind_base, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
          rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
-         bylab  = c("No blinding", "Blinding"))
+         smlab = "Standardized Mean \n Difference")
   dev.off()
 
 #device
- sub.device <- update(m.gen_outX, 
+  sub.device <- update(m.gen, 
                   subgroup = device, 
                   tau.common = FALSE)
   summary(sub.device)
   
+  sub.device_base <- update(m.gen_base, 
+                       subgroup = device, 
+                       tau.common = FALSE)
+  summary(sub.device_base)
+  
   
   sub.device
   pdf(file='results/device subgroup.pdf', width=10, height=15)
-  png(filename='results/device subgroup.png', width=1450, height=1600, res=150)
+  svg(filename='results/device subgroup.svg', width=10, height=16)
   forest(sub.device, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm', 
-         label.e = "EEG", label.c = "fMRI")
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "#5b8bff", col.diamond.random = "lightblue", colgap.forest.left='5.5cm', 
+         smlab = "Standardized Mean \n Difference")
   dev.off()
-
+  
 #instruction
-  sub.instruction <- update(m.gen_outX, 
+  sub.instruction <- update(m.gen, 
                         subgroup = instruction_yn, 
                         tau.common = FALSE)
+  summary(sub.instruction)
+  
+  sub.instruction_base <- update(m.gen_base, 
+                            subgroup = instruction_yn, 
+                            tau.common = FALSE)
+  summary(sub.instruction_base)
   sub.instruction
-  pdf(file='results/instruction subgroup.pdf', width=10, height=15)
-  forest(sub.instruction, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  
+  svg(file='results/base_instruction subgroup.svg', width=10, height=15)
+  forest(sub.instruction_base, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
   dev.off()
 
 #motivation
-  sub.motivation <- update(m.gen_outX, 
+  sub.motivation <- update(m.gen, 
                         subgroup = motivation_yn, 
                         tau.common = FALSE)
+  summary(sub.motivation)
+  
+  sub.motivation_base <- update(m.gen_base, 
+                           subgroup = motivation_yn, 
+                           tau.common = FALSE)
+  summary(sub.motivation_base)
+  
   sub.motivation
-  pdf(file='results/motivation subgroup.pdf', width=10, height=15)
+  svg(file='results/first_motivation subgroup.svg', width=10, height=15)
   forest(sub.motivation, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
   dev.off()
   
 #rehearsal
-  sub.rehearsal <- update(m.gen_outX, 
+  sub.rehearsal <- update(m.gen, 
                        subgroup = rehearsal, 
                        tau.common = FALSE)
+  summary(sub.rehearsal)
+  
+  sub.rehearsal_base <- update(m.gen_base, 
+                          subgroup = rehearsal, 
+                          tau.common = FALSE)
+  summary(sub.rehearsal_base)
+  
   sub.rehearsal
-  pdf(file='results/rehearsal subgroup.pdf', width=10, height=15)
-  png(filename='results/rehearsal subgroup.png', width=1450, height=1600, res=150)
+  svg(file='results/rehearsal subgroup.svg', width=10, height=15)
   forest(sub.rehearsal, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
   dev.off()
   
 #functional localizer
-  func.loc <- update(m.gen_outX, 
+  func.loc <- update(m.gen, 
                        subgroup = func.loc, 
                        tau.common = FALSE)
+  summary(func.loc)
+  
+  func.loc_base <- update(m.gen_base, 
+                     subgroup = func.loc, 
+                     tau.common = FALSE)
+  summary(func.loc_base)
+  
   func.loc
-  pdf(file='results/func.loc subgroup.pdf', width=10, height=15)
-  forest(func.loc, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+  svg(file='results/base_func.loc subgroup.svg', width=10, height=15)
+  forest(m.gen_base, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
   dev.off()
   
   
 # update timing (continuous or intermittent)
-  sub.update.timing <- update(m.gen_outX, 
+  sub.update.timing <- update(m.gen, 
                      subgroup = update.timing, 
                      tau.common = FALSE)
+  summary(sub.update.timing)
   
-  summary(m.gen_outX)
+  sub.update.timing_base <- update(m.gen_base, 
+                              subgroup = update.timing, 
+                              tau.common = FALSE)
+  summary(sub.update.timing_base)
+  
   sub.update.timing
-  pdf(file='results/update.timing subgroup.pdf', width=10, height=15)
+  svg(file='results/update.timing subgroup.svg', width=10, height=15)
   forest(sub.update.timing, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
          test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
-         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm')
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
   dev.off()
   
   
   # direction
-  sub.direction <- update(m.gen_outX, 
+  sub.direction <- update(m.gen, 
                               subgroup = direction, 
                               tau.common = FALSE)
-  sub.direction
+  summary(sub.direction)
   
-  
-  #functional loc
-  sub.func.loc <- update(m.gen_outX, 
-                          subgroup = func.loc, 
+  sub.direction_base <- update(m.gen_base, 
+                          subgroup = direction, 
                           tau.common = FALSE)
-  sub.func.loc
+  summary(sub.direction_base)
   
-  #instruction
-  sub.instruction_yn <- update(m.gen_outX, 
-                          subgroup = instruction_yn, 
-                          tau.common = FALSE)
-  sub.instruction_yn
+  
+  svg(file='results/base_direction subgroup.svg', width=10, height=15)
+  forest(sub.direction_base, fixed=FALSE,random=TRUE, test.subgroup=TRUE,  
+         test.effect.subgroup.random = TRUE, resid.hetstat=FALSE, leftcols=c("studlab"), leftlab=c("Study Author"), 
+         rightcols=c("effect.ci"), rightlab=c("[g% CI]"), print.tau2=FALSE, bottom.lr = TRUE, col.square = "blue", col.diamond.random = "lightblue", colgap.forest.left='5.5cm',
+         smlab = "Standardized Mean \n Difference")
+  dev.off()  
+
   
   
 # additional analyses
